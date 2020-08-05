@@ -9,6 +9,7 @@ class IMProcessor:
         self.bot_client = bot_client
         self.message_formatter = MessageFormatter()
         self.sym_message_parser = SymMessageParser()
+        self.stream_client = StreamClient(bot_client)
 
     def process(self, msg):
         logging.debug('im_processor/process_im_message()')

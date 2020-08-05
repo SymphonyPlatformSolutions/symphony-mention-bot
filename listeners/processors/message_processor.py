@@ -49,7 +49,11 @@ class MessageProcessor:
         userCompany = (userFromid['company'])
 
         logging.debug("--> User ID: " + str(userID) + " & full name: " + str(firstname) + " " + str(lastname))
-        logging.debug("--> User email: " + str(email) + " & displayName: " + str(displayName) + " display Name: " + str(displayName))
+        try:
+            logging.debug("--> User email: " + str(email) + " & username: " + str(username) + " display Name: " + str(displayName))
+        except:
+            logging.debug("--> User email: " + str(email) + " & displayName: " + str(displayName))
+
         logging.debug("--> Stream Type: " + str(streamType) + " with stream ID: " + str(streamID))
         logging.debug("--> User is from: \"" + userCompany + "\" pod")
 

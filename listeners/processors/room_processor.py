@@ -9,6 +9,7 @@ class RoomProcessor:
         self.bot_client = bot_client
         self.message_formatter = MessageFormatter()
         self.sym_message_parser = SymMessageParser()
+        self.stream_client = StreamClient(bot_client)
 
     #reads message and processes it
     #look inside logs/example.log to see the payload (metadata representing event coming over the datafeed)
