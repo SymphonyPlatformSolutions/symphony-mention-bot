@@ -144,6 +144,9 @@ class Whois():
     async def whois(self, msg_mentions, msg):
 
         streamid = msg['stream']['streamId']
+        externalUser = ""
+        external_flag = False
+        userid_list = ""
 
         if len(msg_mentions) <=1:
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
@@ -167,7 +170,28 @@ class Whois():
             for x in range(len(msg_mentions)):
                 if x >= 1:
                     userInfo = (UserClient.get_user_from_id(self, msg_mentions[x]))
-                    userid = userInfo['id']
+
+                    try:
+                        userid = str(userInfo['id'])
+                    except:
+                        userid = str(msg_mentions[x])
+                        mention_raw = self.sym_message_parser.get_mentions(msg)
+                        mention = str(mention_raw).replace("['", "").replace("', '", ", ").replace("']", "")
+                        mention_split_raw = str(mention).split(",")
+                        ext_user_raw = str(mention_split_raw[x])
+                        ext_user = str(ext_user_raw).replace("@", "")
+                        externalUser += str(ext_user) + ", "
+
+                        if int(len(msg_mentions)) == 2:
+                            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>This user, """ + externalUser + """, is not inside your Pod</messageML>"""))
+                        else:
+                            external_flag = True
+                            continue
+                    if str(userid) in str(userid_list):
+                        continue
+                    else:
+                        userid_list += str(userid) + ","
+
                     try:
                         email = userInfo['emailAddress']
                     except:
@@ -186,15 +210,22 @@ class Whois():
                         displayname = "N/A"
                     try:
                         title = userInfo['title']
+                        if str(title) == "":
+                            title = "N/A"
                     except:
                         title = "N/A"
-                    company = userInfo['company']
+                    try:
+                        company = userInfo['company']
+                    except:
+                        company = "N/A"
                     try:
                         username = userInfo['username']
                     except:
                         username = "N/A"
                     try:
                         location = userInfo['location']
+                        if str(location) == "":
+                            location = "N/A"
                     except:
                         location = "N/A"
                     try:
@@ -218,6 +249,11 @@ class Whois():
             table_body += "</tbody></table>"
 
             reply = table_header + table_body
+
+            print(str(externalUser[:-2]))
+            if external_flag:
+                externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
+                self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
             whois_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>User details</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
