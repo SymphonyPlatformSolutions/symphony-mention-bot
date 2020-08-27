@@ -145,10 +145,7 @@ class Whois():
 
         streamid = msg['stream']['streamId']
 
-        try:
-            if msg_mentions[1] == None:
-                pass
-        except:
+        if len(msg_mentions) <=1:
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
 
         else:
