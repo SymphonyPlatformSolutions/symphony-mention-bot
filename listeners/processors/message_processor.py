@@ -1,5 +1,5 @@
 from sym_api_client_python.clients.user_client import UserClient
-from commands.command import AtRoom, Help
+from commands.command import AtRoom, Help, Whois
 from data.pod import Pod
 import defusedxml.ElementTree as ET
 import logging
@@ -119,6 +119,12 @@ class MessageProcessor:
                     except:
                         return logging.debug("/everyone is not working", exc_info=True)
 
+                    try:
+                        if "/whois" in str(commandName):
+                            msg_mentions = self.sym_message_parser.get_mention_ids(msg)
+                            return await Whois.whois(self, msg_mentions, msg)
+                    except:
+                        return logging.debug("/whois is not working", exc_info=True)
 
                     try:
                         ## Help command when called via :@mention /help call

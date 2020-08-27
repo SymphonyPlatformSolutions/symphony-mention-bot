@@ -1,3 +1,4 @@
+from sym_api_client_python.clients.user_client import UserClient
 import codecs, json, os
 import asyncio
 import logging
@@ -17,7 +18,7 @@ class Help:
         await asyncio.sleep(0)
 
         displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1.6) </h2></header> \
+                            <header><h2>Bot Commands (v1.2) </h2></header> \
                             <body> \
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
@@ -31,6 +32,11 @@ class Help:
                                     <td>At Mention all users of the stream</td> \
                                     <td>All</td> \
                                   </tr> \
+                                <tr> \
+                                  <td>" + _config['bot@Mention'] + " /whois</td> \
+                                  <td>followed by @atmention will give the user(s) details</td> \
+                                  <td>All</td> \
+                                </tr> \
                                 </tbody> \
                                 </table> \
                             </body> \
@@ -44,7 +50,7 @@ class Help:
         await asyncio.sleep(0)
 
         displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1.6) (Admin)</h2></header> \
+                            <header><h2>Bot Commands (v1 (Admin)</h2></header> \
                             <body> \
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
@@ -57,6 +63,11 @@ class Help:
                                     <td>" + _config['bot@Mention'] + " /all</td> \
                                     <td>At Mention all users of the stream</td> \
                                   <td>Bot Admin</td> \
+                                </tr> \
+                                <tr> \
+                                  <td>" + _config['bot@Mention'] + " /whois</td> \
+                                  <td>followed by @atmention will give the user(s) details</td> \
+                                  <td>All</td> \
                                 </tr> \
                                 </tbody> \
                                 </table> \
@@ -123,3 +134,94 @@ class AtRoom():
         if splitter == False:
             mention_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header> Room @mentioned by " + str(originator) + "</header><body>" + mentions + "</body></card>"
             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + mention_card + """</messageML>"""))
+
+
+class Whois():
+
+    def __init__(self, bot_client):
+        self.bot_client = bot_client
+
+    async def whois(self, msg_mentions, msg):
+
+        streamid = msg['stream']['streamId']
+
+        try:
+            if msg_mentions[1] == None:
+                pass
+        except:
+            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
+
+        else:
+
+            table_body = ""
+            table_header = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
+                           "<td style='max-width:20%'>ID</td>" \
+                           "<td style='max-width:20%'>EMAIL ADDRESS</td>" \
+                           "<td style='max-width:20%'>FIRST NAME</td>" \
+                           "<td style='max-width:20%'>LAST NAME</td>" \
+                           "<td style='max-width:20%'>DISPLAY NAME</td>" \
+                           "<td style='max-width:20%'>TITLE</td>" \
+                           "<td style='max-width:20%'>COMPANY</td>" \
+                           "<td style='max-width:20%'>USERNAME</td>" \
+                           "<td style='max-width:20%'>LOCATION</td>" \
+                           "<td style='max-width:20%'>ACCOUNT TYPE</td>" \
+                           "</tr></thead><tbody>"
+
+            for x in range(len(msg_mentions)):
+                if x >= 1:
+                    userInfo = (UserClient.get_user_from_id(self, msg_mentions[x]))
+                    userid = userInfo['id']
+                    try:
+                        email = userInfo['emailAddress']
+                    except:
+                        email = "N/A"
+                    try:
+                        firstname = userInfo['firstName']
+                    except:
+                        firstname = "N/A"
+                    try:
+                        lastname = userInfo['lastName']
+                    except:
+                        lastname = "N/A"
+                    try:
+                        displayname = userInfo['displayName']
+                    except:
+                        displayname = "N/A"
+                    try:
+                        title = userInfo['title']
+                    except:
+                        title = "N/A"
+                    company = userInfo['company']
+                    try:
+                        username = userInfo['username']
+                    except:
+                        username = "N/A"
+                    try:
+                        location = userInfo['location']
+                    except:
+                        location = "N/A"
+                    try:
+                        accountype = userInfo['accountType']
+                    except:
+                        accountype = "N/A"
+
+                    table_body += "<tr>" \
+                      "<td>" + str(userid) + "</td>" \
+                      "<td>" + str(email) + "</td>" \
+                      "<td>" + str(firstname) + "</td>" \
+                      "<td>" + str(lastname) + "</td>" \
+                      "<td>" + str(displayname) + "</td>" \
+                      "<td>" + str(title) + "</td>" \
+                      "<td>" + str(company) + "</td>" \
+                      "<td>" + str(username) + "</td>" \
+                      "<td>" + str(location) + "</td>" \
+                      "<td>" + str(accountype) + "</td>" \
+                      "</tr>"
+
+            table_body += "</tbody></table>"
+
+            reply = table_header + table_body
+
+            whois_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>User details</header><body>" + reply + "</body></card>"
+            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
+
