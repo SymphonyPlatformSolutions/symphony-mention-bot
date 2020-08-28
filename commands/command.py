@@ -1,3 +1,4 @@
+from sym_api_client_python.clients.sym_bot_client import APIClient
 from sym_api_client_python.clients.user_client import UserClient
 import codecs, json, os
 import asyncio
@@ -136,6 +137,42 @@ class AtRoom():
             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + mention_card + """</messageML>"""))
 
 
+## Get user profile avatar, if none, assign the default Symphony one
+class GetAvatar(APIClient):
+
+    def __init__(self, bot_client):
+        self.bot_client = bot_client
+
+    ## Get user profile avatar, if none, assign the default Symphony one
+    async def getAvatar(self, userid):
+
+        avatar = ""
+
+        try:
+
+            ## This endpoint does not require user provisioning role
+            urlcall = "/pod/v3/users?uid=" + str(userid).strip()
+
+            response = self.bot_client.execute_rest_call('GET', urlcall)
+            logging.debug(str(response))
+            print(response)
+            pic = str((response['users'][0]['avatars'][1]['url']))#.replace("/150/","/50/")
+            logging.debug(str(pic))
+
+            if str(pic).startswith("http"):
+                logging.debug("None standard URL for Avatar - using s3 bucket, user needs to re-upload avatar")
+                avatar = "https://i.ibb.co/GRF3H0p/Symphony-50.jpg"
+                return avatar
+            else:
+                avatar = str(_config['podURL']) + str(pic).replace("'}", "")
+                logging.debug(str(avatar))
+                return avatar
+
+        except:
+            logging.debug("inside except for avatar")
+            avatar = "https://i.ibb.co/GRF3H0p/Symphony-50.jpg"
+            return (avatar)
+
 class Whois():
 
     def __init__(self, bot_client):
@@ -149,24 +186,35 @@ class Whois():
         userid_list = ""
         validUser = False
 
-
         if len(msg_mentions) <=1:
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
 
         else:
 
             table_body = ""
-            table_header = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
+            table_header = ""
+            table_body_main = ""
+            # table_header = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
+            #                "<td style='max-width:20%'>AVATAR</td>" \
+            #                "<td style='max-width:20%'>ID</td>" \
+            #                "<td style='max-width:20%'>EMAIL ADDRESS</td>" \
+            #                "<td style='max-width:20%'>FIRST NAME</td>" \
+            #                "<td style='max-width:20%'>LAST NAME</td>" \
+            #                "<td style='max-width:20%'>DISPLAY NAME</td>" \
+            #                "<td style='max-width:20%'>TITLE</td>" \
+            #                "<td style='max-width:20%'>COMPANY</td>" \
+            #                "<td style='max-width:20%'>USERNAME</td>" \
+            #                "<td style='max-width:20%'>LOCATION</td>" \
+            #                "<td style='max-width:20%'>ACCOUNT TYPE</td>" \
+            #                "</tr></thead><tbody>"
+
+
+            table_header_main = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
                            "<td style='max-width:20%'>ID</td>" \
                            "<td style='max-width:20%'>EMAIL ADDRESS</td>" \
                            "<td style='max-width:20%'>FIRST NAME</td>" \
                            "<td style='max-width:20%'>LAST NAME</td>" \
                            "<td style='max-width:20%'>DISPLAY NAME</td>" \
-                           "<td style='max-width:20%'>TITLE</td>" \
-                           "<td style='max-width:20%'>COMPANY</td>" \
-                           "<td style='max-width:20%'>USERNAME</td>" \
-                           "<td style='max-width:20%'>LOCATION</td>" \
-                           "<td style='max-width:20%'>ACCOUNT TYPE</td>" \
                            "</tr></thead><tbody>"
 
             for x in range(len(msg_mentions)):
@@ -247,22 +295,65 @@ class Whois():
                     except:
                         accountype = "N/A"
 
-                    table_body += "<tr>" \
+                    userAvatar_raw = await GetAvatar.getAvatar(self, userid)
+                    userAvatar = str(userAvatar_raw).replace("..", "")
+                    avatarLink = "<img src=\"" + str(userAvatar) + "\" />"
+
+                    # table_body += "<tr>" \
+                    #   "<td>" + str(avatarLink) + "</td>" \
+                    #   "<td>" + str(userid) + "</td>" \
+                    #   "<td>" + str(email) + "</td>" \
+                    #   "<td>" + str(firstname) + "</td>" \
+                    #   "<td>" + str(lastname) + "</td>" \
+                    #   "<td>" + str(displayname) + "</td>" \
+                    #   "<td>" + str(title) + "</td>" \
+                    #   "<td>" + str(company) + "</td>" \
+                    #   "<td>" + str(username) + "</td>" \
+                    #   "<td>" + str(location) + "</td>" \
+                    #   "<td>" + str(accountype) + "</td>" \
+                    #   "</tr>"
+
+                    table_body_main += "<tr>" \
                       "<td>" + str(userid) + "</td>" \
                       "<td>" + str(email) + "</td>" \
                       "<td>" + str(firstname) + "</td>" \
                       "<td>" + str(lastname) + "</td>" \
                       "<td>" + str(displayname) + "</td>" \
-                      "<td>" + str(title) + "</td>" \
-                      "<td>" + str(company) + "</td>" \
-                      "<td>" + str(username) + "</td>" \
-                      "<td>" + str(location) + "</td>" \
-                      "<td>" + str(accountype) + "</td>" \
                       "</tr>"
 
-            table_body += "</tbody></table>"
+                    ## Card inside Card
+                    table_header += "<table style='border-collapse:collapse;border:2px solid black;table-layout:auto;width:100%;box-shadow: 5px 5px'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--black tempo-bg-color--black\">" \
+                    "<td style='border:1px solid black;text-align:left' colspan=\"3\"></td></tr><tr>" \
+                    "<td style='border:1px solid black;text-align:center;width:7.5%' rowspan=\"10\">" + str(avatarLink) + "</td>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>ID</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(userid) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>EMAIL</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(email) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>FIRSTNAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(firstname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>LASTNAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(lastname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>DISPLAY NAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(displayname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>TIITLE</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(title) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>COMPANY</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(company) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>USERNAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(username) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>LOCATION</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(location) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>TYPE</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(accountype) + " " + "</td></tr></thead><tbody></tbody></table>"
 
-            reply = table_header + table_body
+
+
+            table_body_main += "</tbody></table>"
+
+            reply_main = table_header_main + table_body_main
+            print(reply_main)
+            reply = table_header
+            print(reply)
 
             if external_flag and validUser:
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
@@ -272,6 +363,6 @@ class Whois():
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
-            whois_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>User details</header><body>" + reply + "</body></card>"
+            whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
 
