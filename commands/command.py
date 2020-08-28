@@ -147,6 +147,8 @@ class Whois():
         externalUser = ""
         external_flag = False
         userid_list = ""
+        validUser = False
+
 
         if len(msg_mentions) <=1:
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
@@ -173,6 +175,7 @@ class Whois():
 
                     try:
                         userid = str(userInfo['id'])
+                        validUser = True
                     except:
                         userid = str(msg_mentions[x])
                         mention_raw = self.sym_message_parser.get_mentions(msg)
@@ -180,13 +183,24 @@ class Whois():
                         mention_split_raw = str(mention).split(",")
                         ext_user_raw = str(mention_split_raw[x])
                         ext_user = str(ext_user_raw).replace("@", "")
-                        externalUser += str(ext_user) + ", "
 
+                        ## Check for dups in external user
+                        ## If Dup
+                        if str(ext_user) in str(externalUser):
+                            continue
+                        else:
+                            ## No Dup
+                            externalUser += str(ext_user) + ", "
+
+                        ## check that only 1 @mention was used (apart from bot itself)
                         if int(len(msg_mentions)) == 2:
-                            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>This user, """ + externalUser + """, is not inside your Pod</messageML>"""))
+                            usernotinside = "This user," + externalUser + " is not inside your Pod"
+                            self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + usernotinside + """</messageML>"""))
                         else:
                             external_flag = True
                             continue
+
+                    ## Check for dups in userids for display
                     if str(userid) in str(userid_list):
                         continue
                     else:
@@ -250,10 +264,13 @@ class Whois():
 
             reply = table_header + table_body
 
-            print(str(externalUser[:-2]))
-            if external_flag:
+            if external_flag and validUser:
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
+
+            elif external_flag:
+                externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
+                return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
             whois_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>User details</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
