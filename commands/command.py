@@ -155,7 +155,6 @@ class GetAvatar(APIClient):
 
             response = self.bot_client.execute_rest_call('GET', urlcall)
             logging.debug(str(response))
-            print(response)
             pic = str((response['users'][0]['avatars'][1]['url']))#.replace("/150/","/50/")
             logging.debug(str(pic))
 
@@ -345,8 +344,6 @@ class Whois():
                     "<td style='border:1px solid black;text-align:center'>" + str(location) + "</td></tr><tr>" \
                     "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>TYPE</td>" \
                     "<td style='border:1px solid black;text-align:center'>" + str(accountype) + " " + "</td></tr></thead><tbody></tbody></table>"
-
-
 
             table_body_main += "</tbody></table>"
 
