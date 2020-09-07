@@ -77,11 +77,11 @@ class AtRoom():
 
             userId = str(response[index]["id"])
 
-            ## Check the member is not bot
-            userInfo = (UserClient.get_user_from_id(self, userId))
-            userType = userInfo['accountType']
+            # ## Check the member is not bot
+            # userInfo = (UserClient.get_user_from_id(self, userId))['accountType']
+            # print(userInfo)
 
-            if (str(userId) == str(from_user)) or (str(userId) == str(botuserid)) or (str(userType) == "SYSTEM"):
+            if (str(userId) == str(from_user)) or (str(userId) == str(botuserid)):# or (str(userInfo) == "SYSTEM"):
                 logging.debug("ignored ids")
             else:
                 counter += 1
