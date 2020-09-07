@@ -33,8 +33,14 @@ class MessageProcessor:
         mention = ""
         mention_len = ""
 
-        firstname = msg['user']['firstName']
-        lastname = msg['user']['lastName']
+        try:
+            firstname = msg['user']['firstName']
+        except:
+            firstname = "N/A"
+        try:
+            lastname = msg['user']['lastName']
+        except:
+            lastname = "N/A"
         displayName = msg['user']['displayName']
         email = msg['user']['email']
         userID = msg['user']['userId']
