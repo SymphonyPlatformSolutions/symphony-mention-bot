@@ -29,8 +29,9 @@ class MessageProcessor:
 
     async def processor(self, msg):
 
-        adminAllowed = False
         podAllowed = False
+        mention = ""
+        mention_len = ""
 
         firstname = msg['user']['firstName']
         lastname = msg['user']['lastName']
@@ -96,11 +97,11 @@ class MessageProcessor:
         This is to make sure the user is from the allowed pod(s)
         """
         if userCompany in Pod:
-            logging.debug("Inside allowed Pod)(s), True")
+            logging.debug("Inside allowed Pod(s), True")
             podAllowed = True
         else:
             podAllowed = False
-            logging.debug("Inside allowed Pod)(s), False")
+            logging.debug("Outside allowed Pod(s), False")
 
 
         try:
@@ -129,12 +130,8 @@ class MessageProcessor:
                     try:
                         ## Help command when called via :@mention /help call
                         if "/help" in str(commandName):
-                            if adminAllowed:
-                                return await Help.helpAdmin(self, msg)
-                            else:
-                                #await asyncio.sleep(5)
-                                logging.debug("help")
-                                return await Help.help(self, msg)
+                            logging.debug("help")
+                            return await Help.help(self, msg)
                     except:
                         return logging.debug("Help is not working",  exc_info=True)
 

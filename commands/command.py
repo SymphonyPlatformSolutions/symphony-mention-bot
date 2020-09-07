@@ -19,7 +19,7 @@ class Help:
         await asyncio.sleep(0)
 
         displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1.2) </h2></header> \
+                            <header><h2>Bot Commands (v1) </h2></header> \
                             <body> \
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
@@ -35,39 +35,7 @@ class Help:
                                   </tr> \
                                 <tr> \
                                   <td>" + _config['bot@Mention'] + " /whois</td> \
-                                  <td>followed by @atmention will give the user(s) details</td> \
-                                  <td>All</td> \
-                                </tr> \
-                                </tbody> \
-                                </table> \
-                            </body> \
-                        </card>"
-
-        self.help = dict(message="""<messageML>""" + displayHelp + """</messageML>""")
-        return self.bot_client.get_message_client().send_msg(msg['stream']['streamId'], self.help)
-
-    async def helpAdmin(self, msg):
-
-        await asyncio.sleep(0)
-
-        displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1 (Admin)</h2></header> \
-                            <body> \
-                              <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
-                                    <td><b>Command</b></td> \
-                                    <td><b>Description</b></td> \
-                                    <td><b>Permission</b></td> \
-                                  </tr> \
-                                </thead> \
-                                <tbody> \
-                                <tr> \
-                                    <td>" + _config['bot@Mention'] + " /all</td> \
-                                    <td>At Mention all users of the stream</td> \
-                                  <td>Bot Admin</td> \
-                                </tr> \
-                                <tr> \
-                                  <td>" + _config['bot@Mention'] + " /whois</td> \
-                                  <td>followed by @atmention will give the user(s) details</td> \
+                                  <td>followed by @mention will give the user(s) details</td> \
                                   <td>All</td> \
                                 </tr> \
                                 </tbody> \
@@ -158,10 +126,19 @@ class GetAvatar(APIClient):
             pic = str((response['users'][0]['avatars'][1]['url']))#.replace("/150/","/50/")
             logging.debug(str(pic))
 
+            ## changing default 50 to 150
+            if str(pic).startswith("../avatars/static/50/default.png"):
+                logging.debug("default avatar 50")
+                avatar = _config['podURL'] + "/avatars/static/150/default.png"
+                return avatar
+
+            ## Handling when avatar is not uploaded to the right bucket
             if str(pic).startswith("http"):
                 logging.debug("None standard URL for Avatar - using s3 bucket, user needs to re-upload avatar")
-                avatar = "https://i.ibb.co/GRF3H0p/Symphony-50.jpg"
+                avatar = _config['podURL'] + "/avatars/static/150/default.png"
                 return avatar
+
+            ## When avatar is correct
             else:
                 avatar = str(_config['podURL']) + str(pic).replace("'}", "")
                 logging.debug(str(avatar))
@@ -169,7 +146,7 @@ class GetAvatar(APIClient):
 
         except:
             logging.debug("inside except for avatar")
-            avatar = "https://i.ibb.co/GRF3H0p/Symphony-50.jpg"
+            avatar = _config['podURL'] + "/avatars/static/150/default.png"
             return (avatar)
 
 class Whois():
@@ -348,9 +325,9 @@ class Whois():
             table_body_main += "</tbody></table>"
 
             reply_main = table_header_main + table_body_main
-            print(reply_main)
+            # print(reply_main)
             reply = table_header
-            print(reply)
+            # print(reply)
 
             if external_flag and validUser:
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
