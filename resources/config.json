@@ -1,12 +1,12 @@
 {
-    "podURL": "https://preview.symphony.com",
-    "sessionAuthHost": "preview.symphony.com",
+    "podURL": "https://develop2.symphony.com",
+    "sessionAuthHost": "develop2.symphony.com",
     "sessionAuthPort": 443,
-    "keyAuthHost": "preview.symphony.com",
+    "keyAuthHost": "develop2.symphony.com",
     "keyAuthPort": 443,
-    "podHost": "preview.symphony.com",
+    "podHost": "develop2.symphony.com",
     "podPort": 443,
-    "agentHost": "preview.symphony.com",
+    "agentHost": "develop2.symphony.com",
     "agentPort": 443,
     "authType": "rsa",
     "botCertPath": "",
@@ -24,5 +24,6 @@
     "proxyUsername": "",
     "proxyPassword": "",
     "authTokenRefreshPeriod": "30",
-    "truststorePath": ""
+    "truststorePath": "",
+    "allowedPod" : "Symphony Partner Development, Symphony Preview Pod"
 }

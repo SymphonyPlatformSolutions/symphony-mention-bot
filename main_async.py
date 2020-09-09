@@ -2,7 +2,7 @@ import argparse
 import asyncio
 import logging
 import time
-import os
+import os, sys
 
 from sym_api_client_python.auth.auth import Auth
 from sym_api_client_python.auth.rsa_auth import SymBotRSAAuth
@@ -13,16 +13,34 @@ from listeners.room_listener_test_imp import AsyncRoomListenerImp
 # from sym_api_client_python.listeners.im_listener_test_imp import AsyncIMListenerImp
 # from sym_api_client_python.listeners.room_listener_test_imp import AsyncRoomListenerImp
 
+
 def configure_logging():
-        log_dir = os.path.join(os.path.dirname(__file__), "logs")
-        if not os.path.exists(log_dir):
-            os.makedirs(log_dir, exist_ok=True)
         logging.basicConfig(
-                filename=os.path.join(log_dir, 'MentionBot.log'),
-                format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                stream=sys.stdout,
+                format='%(asctime)s - %(levelname)s - %(message)s',
                 filemode='w', level=logging.DEBUG
         )
+        logger = logging.getLogger()
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+        stderr_handler = logging.StreamHandler(sys.stderr)
+        stderr_handler.setLevel(logging.ERROR)
+        stderr_handler.setFormatter(formatter)
+
+        logger.addHandler(stderr_handler)
         logging.getLogger("urllib3").setLevel(logging.WARNING)
+
+### logs to file
+# def configure_logging():
+#         log_dir = os.path.join(os.path.dirname(__file__), "logs")
+#         if not os.path.exists(log_dir):
+#             os.makedirs(log_dir, exist_ok=True)
+#         logging.basicConfig(
+#                 filename=os.path.join(log_dir, 'MentionBot.log'),
+#                 format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#                 filemode='w', level=logging.DEBUG
+#         )
+#         logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 # def configure_logging():
 #
@@ -79,7 +97,7 @@ def main():
         datafeed_event_service.add_room_listener(room_listener_test)
 
         # Create and read the datafeed
-        print('Starting datafeed')
+        logging.debug('Starting datafeed')
         loop = asyncio.get_event_loop()
         awaitables = asyncio.gather(datafeed_event_service.start_datafeed())
         loop.run_until_complete(awaitables)

@@ -1,6 +1,5 @@
 from sym_api_client_python.clients.user_client import UserClient
 from commands.command import AtRoom, Help, Whois
-from data.pod import Pod
 import defusedxml.ElementTree as ET
 import logging
 import codecs
@@ -102,7 +101,7 @@ class MessageProcessor:
         """
         This is to make sure the user is from the allowed pod(s)
         """
-        if userCompany in Pod:
+        if userCompany in _config['allowedPod']:
             logging.debug("Inside allowed Pod(s), True")
             podAllowed = True
         else:
@@ -145,7 +144,7 @@ class MessageProcessor:
                     return logging.debug("bot @mentioned does not match expected, or not calling bot command")
                     # self.bot_client.get_message_client().send_msg(msg['stream']['streamId'], self.help_message)
             else:
-                return logging.debug("User is not from the allowed Pod(s) or is not an Solutions Architect")
+                return logging.debug("User is not from the allowed Pod(s)")
                 # self.bot_client.get_message_client().send_msg(msg['stream']['streamId'], self.help_message)
         except:
             return logging.debug("bot @mentioned was not used",  exc_info=True)
