@@ -1,17 +1,21 @@
 import argparse
 import asyncio
 import logging
-import time
-import os, sys
+import os, sys, codecs, json
 
 from sym_api_client_python.auth.auth import Auth
 from sym_api_client_python.auth.rsa_auth import SymBotRSAAuth
 from sym_api_client_python.clients.sym_bot_client import SymBotClient
 from sym_api_client_python.configure.configure import SymConfig
-from listeners.im_listener_test_imp import AsyncIMListenerImp
-from listeners.room_listener_test_imp import AsyncRoomListenerImp
+from app.listeners.im_listener_test_imp import AsyncIMListenerImp
+from app.listeners.room_listener_test_imp import AsyncRoomListenerImp
 # from sym_api_client_python.listeners.im_listener_test_imp import AsyncIMListenerImp
 # from sym_api_client_python.listeners.room_listener_test_imp import AsyncRoomListenerImp
+
+## Loading config json files
+_configPath = os.path.abspath('./resources/config.json')
+with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
+        _config = json.load(json_file)
 
 
 def configure_logging():
@@ -66,7 +70,7 @@ def main():
 
         # Cert Auth flow: pass path to certificate config.json file
         if args.config is None:
-            config_path = os.path.join(os.path.dirname(__file__), "resources", "config.json")
+            config_path = os.path.join(os.path.dirname(__file__), "../resources", "config.json")
         else:
             config_path = args.config
 
@@ -98,9 +102,11 @@ def main():
 
         # Create and read the datafeed
         logging.debug('Starting datafeed')
+        logging.info('Datafeed started - bot is ready')
         loop = asyncio.get_event_loop()
         awaitables = asyncio.gather(datafeed_event_service.start_datafeed())
         loop.run_until_complete(awaitables)
+
 
 
 if __name__ == "__main__":

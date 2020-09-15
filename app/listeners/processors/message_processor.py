@@ -1,5 +1,5 @@
 from sym_api_client_python.clients.user_client import UserClient
-from commands.command import AtRoom, Help, Whois
+from app.commands.command import AtRoom, Help, Whois
 import defusedxml.ElementTree as ET
 import logging
 import codecs
@@ -121,30 +121,33 @@ class MessageProcessor:
 
                     try:
                         if "/all" in str(commandName):
+                            logging.info("Calling /all by " + str(displayName))
                             return await AtRoom.atRoom(self, msg)
                     except:
-                        return logging.debug("/everyone is not working", exc_info=True)
+                        logging.error("/all is not working")
+                        return logging.debug("/all is not working", exc_info=True)
 
                     try:
                         if "/whois" in str(commandName):
+                            logging.info("Calling /whois by " + str(displayName))
                             msg_mentions = self.sym_message_parser.get_mention_ids(msg)
                             return await Whois.whois(self, msg_mentions, msg)
                     except:
+                        logging.error("/whois is not working")
                         return logging.debug("/whois is not working", exc_info=True)
 
                     try:
                         ## Help command when called via :@mention /help call
                         if "/help" in str(commandName):
-                            logging.debug("help")
+                            logging.info("Calling /help by " + str(displayName))
                             return await Help.help(self, msg)
                     except:
+                        logging.error("/help is not working")
                         return logging.debug("Help is not working",  exc_info=True)
 
                 else:
                     return logging.debug("bot @mentioned does not match expected, or not calling bot command")
-                    # self.bot_client.get_message_client().send_msg(msg['stream']['streamId'], self.help_message)
             else:
                 return logging.debug("User is not from the allowed Pod(s)")
-                # self.bot_client.get_message_client().send_msg(msg['stream']['streamId'], self.help_message)
         except:
             return logging.debug("bot @mentioned was not used",  exc_info=True)

@@ -89,6 +89,7 @@ class AtRoom():
                 mentions += "<mention uid=\"" + userId + "\"/> "
 
                 if splitter and int(counter) == int(atMentionLimit):
+                    logging.debug("Displaying @mention")
                     if once:
                         mention_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header> Room @mentioned by " + str(originator) + "</header><body>" + mentions + "</body></card>"
                         self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + mention_card + """</messageML>"""))
@@ -102,10 +103,12 @@ class AtRoom():
                     thereIsMore = True
                     once = False
                 elif thereIsMore and (int(totalUsersInRoom) == int(counterAtmentionedOnly) + 2):
+                    logging.debug("Displaying @mention for more users")
                     mention_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header></header><body>" + mentions + "</body></card>"
                     self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + mention_card + """</messageML>"""))
 
         if splitter == False:
+            logging.debug("Displaying @mention")
             mention_card = "<card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header> Room @mentioned by " + str(originator) + "</header><body>" + mentions + "</body></card>"
             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + mention_card + """</messageML>"""))
 
@@ -150,7 +153,7 @@ class GetAvatar(APIClient):
                 return avatar
 
         except:
-            logging.debug("inside except for avatar")
+            logging.warning("inside except for avatar")
             avatar = _config['podURL'] + "/avatars/static/150/default.png"
             return (avatar)
 
@@ -168,27 +171,13 @@ class Whois():
         validUser = False
 
         if len(msg_mentions) <=1:
+            logging.warning("Please use the command followed by an @mention")
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
 
         else:
 
-            table_body = ""
             table_header = ""
             table_body_main = ""
-            # table_header = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
-            #                "<td style='max-width:20%'>AVATAR</td>" \
-            #                "<td style='max-width:20%'>ID</td>" \
-            #                "<td style='max-width:20%'>EMAIL ADDRESS</td>" \
-            #                "<td style='max-width:20%'>FIRST NAME</td>" \
-            #                "<td style='max-width:20%'>LAST NAME</td>" \
-            #                "<td style='max-width:20%'>DISPLAY NAME</td>" \
-            #                "<td style='max-width:20%'>TITLE</td>" \
-            #                "<td style='max-width:20%'>COMPANY</td>" \
-            #                "<td style='max-width:20%'>USERNAME</td>" \
-            #                "<td style='max-width:20%'>LOCATION</td>" \
-            #                "<td style='max-width:20%'>ACCOUNT TYPE</td>" \
-            #                "</tr></thead><tbody>"
-
 
             table_header_main = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
                            "<td style='max-width:20%'>ID</td>" \
@@ -204,6 +193,7 @@ class Whois():
 
                     try:
                         userid = str(userInfo['id'])
+                        logging.debug("User ID: " + int(userid))
                         validUser = True
                     except:
                         userid = str(msg_mentions[x])
@@ -223,6 +213,7 @@ class Whois():
 
                         ## check that only 1 @mention was used (apart from bot itself)
                         if int(len(msg_mentions)) == 2:
+                            logging.debug("User is not inside pod: " + (str(externalUser)))
                             usernotinside = "This user," + externalUser + " is not inside your Pod"
                             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + usernotinside + """</messageML>"""))
                         else:
@@ -280,20 +271,6 @@ class Whois():
                     userAvatar = str(userAvatar_raw).replace("..", "")
                     avatarLink = "<img src=\"" + str(userAvatar) + "\" />"
 
-                    # table_body += "<tr>" \
-                    #   "<td>" + str(avatarLink) + "</td>" \
-                    #   "<td>" + str(userid) + "</td>" \
-                    #   "<td>" + str(email) + "</td>" \
-                    #   "<td>" + str(firstname) + "</td>" \
-                    #   "<td>" + str(lastname) + "</td>" \
-                    #   "<td>" + str(displayname) + "</td>" \
-                    #   "<td>" + str(title) + "</td>" \
-                    #   "<td>" + str(company) + "</td>" \
-                    #   "<td>" + str(username) + "</td>" \
-                    #   "<td>" + str(location) + "</td>" \
-                    #   "<td>" + str(accountype) + "</td>" \
-                    #   "</tr>"
-
                     table_body_main += "<tr>" \
                       "<td>" + str(userid) + "</td>" \
                       "<td>" + str(email) + "</td>" \
@@ -330,18 +307,21 @@ class Whois():
             table_body_main += "</tbody></table>"
 
             reply_main = table_header_main + table_body_main
-            # print(reply_main)
+            logging.debug(str(reply_main))
             reply = table_header
-            # print(reply)
+            logging.debug(str(reply))
 
             if external_flag and validUser:
+                logging.debug("External user: " + str(externalUser[:-2]))
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
             elif external_flag:
+                logging.debug("External user: " + str(externalUser[:-2]))
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
+            logging.info("User lookup rendering")
             whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
 
