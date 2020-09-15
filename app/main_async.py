@@ -22,7 +22,7 @@ def configure_logging():
         logging.basicConfig(
                 stream=sys.stdout,
                 format='%(asctime)s - %(levelname)s - %(message)s',
-                filemode='w', level=logging.DEBUG
+                filemode='w', level=logging.INFO
         )
         logger = logging.getLogger()
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
