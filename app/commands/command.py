@@ -193,8 +193,9 @@ class Whois():
 
                     try:
                         userid = str(userInfo['id'])
-                        logging.debug("User ID: " + int(userid))
+                        logging.debug("User ID: " + str(userid))
                         validUser = True
+
                     except:
                         userid = str(msg_mentions[x])
                         mention_raw = self.sym_message_parser.get_mentions(msg)

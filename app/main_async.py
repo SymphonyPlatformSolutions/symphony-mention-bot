@@ -9,8 +9,6 @@ from sym_api_client_python.clients.sym_bot_client import SymBotClient
 from sym_api_client_python.configure.configure import SymConfig
 from app.listeners.im_listener_test_imp import AsyncIMListenerImp
 from app.listeners.room_listener_test_imp import AsyncRoomListenerImp
-# from sym_api_client_python.listeners.im_listener_test_imp import AsyncIMListenerImp
-# from sym_api_client_python.listeners.room_listener_test_imp import AsyncRoomListenerImp
 
 ## Loading config json files
 _configPath = os.path.abspath('./resources/config.json')
