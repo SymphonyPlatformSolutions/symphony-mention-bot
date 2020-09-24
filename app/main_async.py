@@ -17,10 +17,14 @@ with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
 
 
 def configure_logging():
+
+        level_str = _config['LOG_LEVEL']
+        my_level = str(level_str)
+
         logging.basicConfig(
                 stream=sys.stdout,
                 format='%(asctime)s - %(levelname)s - %(message)s',
-                filemode='w', level=logging.INFO
+                filemode='w', level=my_level
         )
         logger = logging.getLogger()
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')

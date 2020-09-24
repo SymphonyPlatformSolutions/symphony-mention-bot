@@ -25,5 +25,6 @@
     "proxyPassword": "",
     "authTokenRefreshPeriod": "30",
     "truststorePath": "",
-    "allowedPod" : "Symphony Partner Development, Symphony Preview Pod"
+    "allowedPod" : "Symphony Partner Development, Symphony Preview Pod",
+    "LOG_LEVEL" : "INFO"
 }
