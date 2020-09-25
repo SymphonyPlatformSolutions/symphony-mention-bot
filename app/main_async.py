@@ -71,12 +71,13 @@ def main():
         configure_logging()
 
         # Cert Auth flow: pass path to certificate config.json file
-        if args.config is None:
-            config_path = os.path.join(os.path.dirname(__file__), "../resources", "config.json")
-        else:
-            config_path = args.config
+        # if args.config is None:
+        #     config_path = os.path.join(os.path.dirname(__file__), "../resources", "config.json")
+        # else:
+        #     config_path = args.config
 
-        configure = SymConfig(config_path, config_path)
+        # configure = SymConfig(config_path, config_path)
+        configure = SymConfig(_configPath, _configPath)
         configure.load_config()
 
         if args.auth == "rsa":
