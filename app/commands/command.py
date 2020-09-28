@@ -9,6 +9,15 @@ _configPath = os.path.abspath('./resources/config.json')
 with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
         _config = json.load(json_file)
 
+
+## Use config file
+# audit_stream = _config['bot_audit']
+# corp
+#audit_stream = "gNfwD-EUiOzVBEbWHv5g6X___ossLnMcdA"
+# develop2
+audit_stream = "MnWLDq-Ge1sXVL0mhshsk3___ossK-3HdA"
+
+
 class Help:
 
     def __init__(self, bot_client):
@@ -169,6 +178,8 @@ class Whois():
         external_flag = False
         userid_list = ""
         validUser = False
+        userlist = ""
+        caller = msg['user']['displayName']
 
         if len(msg_mentions) <=1:
             logging.warning("Please use the command followed by an @mention")
@@ -217,6 +228,9 @@ class Whois():
                             logging.debug("User is not inside pod: " + (str(externalUser)))
                             usernotinside = "This user," + externalUser + " is not inside your Pod"
                             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + usernotinside + """</messageML>"""))
+                            #Audit
+                            self.botaudit = dict(message="""<messageML>/whois This user,""" + externalUser + """ is not inside your Pod)</messageML>""")
+                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         else:
                             external_flag = True
                             continue
@@ -225,7 +239,7 @@ class Whois():
                     if str(userid) in str(userid_list):
                         continue
                     else:
-                        userid_list += str(userid) + ","
+                        userid_list += str(userid) + ", "
 
                     try:
                         email = userInfo['emailAddress']
@@ -272,6 +286,8 @@ class Whois():
                     userAvatar = str(userAvatar_raw).replace("..", "")
                     avatarLink = "<img src=\"" + str(userAvatar) + "\" />"
 
+                    userlist += " - " + str(displayname)
+
                     table_body_main += "<tr>" \
                       "<td>" + str(userid) + "</td>" \
                       "<td>" + str(email) + "</td>" \
@@ -312,17 +328,29 @@ class Whois():
             reply = table_header
             logging.debug(str(reply))
 
+
             if external_flag and validUser:
                 logging.debug("External user: " + str(externalUser[:-2]))
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
+                #Audit
+                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
 
             elif external_flag:
                 logging.debug("External user: " + str(externalUser[:-2]))
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
+                # Audit
+                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
                 return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
             logging.info("User lookup rendering")
+            #Audit
+            self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - Internal User """ + str(userlist) + """</messageML>""")
+            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
             whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
 
