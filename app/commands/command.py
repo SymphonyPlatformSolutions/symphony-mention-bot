@@ -28,19 +28,16 @@ class Help:
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
                                     <td><b>Description</b></td> \
-                                    <td><b>Permission</b></td> \
                                   </tr> \
                                 </thead> \
                                 <tbody> \
                                   <tr> \
                                     <td>" + _config['bot@Mention'] + " /all</td> \
                                     <td>At Mention all users of the stream</td> \
-                                    <td>All</td> \
                                   </tr> \
                                 <tr> \
                                   <td>" + _config['bot@Mention'] + " /whois</td> \
                                   <td>followed by @mention will give the user(s) details</td> \
-                                  <td>All</td> \
                                 </tr> \
                                 </tbody> \
                                 </table> \
