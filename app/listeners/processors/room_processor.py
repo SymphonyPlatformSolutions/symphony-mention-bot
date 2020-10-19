@@ -12,7 +12,6 @@ class RoomProcessor:
         self.stream_client = StreamClient(bot_client)
 
     #reads message and processes it
-    #look inside logs/example.log to see the payload (metadata representing event coming over the datafeed)
     def process(self, msg):
         logging.debug('room_processor/process_room_message()')
         message_processor.processor(self, msg)

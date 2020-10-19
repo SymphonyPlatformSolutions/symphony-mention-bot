@@ -14,15 +14,15 @@
     "botCertPassword": "",
     "botPrivateKeyPath": "",
     "botPrivateKeyName": "private.pem",
-    "botUsername": "",
-    "bot@Mention": "@<botname>",
+    "botUsername": "MentionBot",
+    "bot@Mention": "@MentionBot",
     "botEmailAddress": "",
-    "appCertPath": "",
-    "appCertName": "",
-    "appCertPassword": "",
     "proxyURL": "",
     "proxyUsername": "",
     "proxyPassword": "",
     "authTokenRefreshPeriod": "30",
-    "truststorePath": ""
+    "truststorePath": "",
+    "allowedPod" : "<podname>",
+    "LOG_LEVEL" : "INFO",
+    "bot_audit": "<streamid>"
 }

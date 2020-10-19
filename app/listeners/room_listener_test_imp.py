@@ -53,7 +53,6 @@ class AsyncRoomListenerImp(RoomListener):
 
     def __init__(self, sym_bot_client):
         self.bot_client = sym_bot_client
-        # self.message_parser = SymMessageParser()
         self.room_processor = AsyncRoomProcessor(self.bot_client)
 
     async def on_room_msg(self, msg):

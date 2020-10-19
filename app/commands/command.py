@@ -11,12 +11,7 @@ with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
 
 
 ## Use config file
-# audit_stream = _config['bot_audit']
-# corp
-#audit_stream = "gNfwD-EUiOzVBEbWHv5g6X___ossLnMcdA"
-# develop2
-audit_stream = "MnWLDq-Ge1sXVL0mhshsk3___ossK-3HdA"
-
+audit_stream = _config['bot_audit']
 
 class Help:
 
@@ -28,7 +23,7 @@ class Help:
         await asyncio.sleep(0)
 
         displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1) </h2></header> \
+                            <header><h2>Bot Commands (v1.1)</h2></header> \
                             <body> \
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
@@ -72,6 +67,10 @@ class AtRoom():
         originator = "<mention uid=\"" + str(from_user) + "\"/>"
         botuserid = (self.bot_client.get_bot_user_info())['id']
         mentions = ""
+        stream_type = (self.bot_client.get_stream_client().stream_info_v2(streamid))['streamType']['type']
+
+        if str(stream_type) == "IM":
+            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>There is only you and me, """ + str(originator) + """ <emoji shortcode="smile" /></messageML>"""))
 
         response = self.stream_client.get_room_members(streamid)
 

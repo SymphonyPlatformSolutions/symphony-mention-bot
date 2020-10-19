@@ -70,13 +70,6 @@ def main():
         # Configure log
         configure_logging()
 
-        # Cert Auth flow: pass path to certificate config.json file
-        # if args.config is None:
-        #     config_path = os.path.join(os.path.dirname(__file__), "../resources", "config.json")
-        # else:
-        #     config_path = args.config
-
-        # configure = SymConfig(config_path, config_path)
         configure = SymConfig(_configPath, _configPath)
         configure.load_config()
 
@@ -114,6 +107,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    ## Not needed for Docker
     # while loopCount < 10:
     #     try:
     #         main()

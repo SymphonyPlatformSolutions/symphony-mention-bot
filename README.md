@@ -1,5 +1,5 @@
 # Mention
-Symphony Room @mention bot
+Symphony Room @mention bot by Alex Nalin (Symphony Solutions Architect)
 
 This bot was build using the Symphony Python SDK.
 
@@ -40,7 +40,7 @@ Modify resources\config.json to point to your desired Pod and update the below i
     
 Modify the config.json to add your Pod name under allowedPod:
 
-    "allowedPod" : "Symphony Partner Development, Symphony Preview Pod",
+    "allowedPod" : "Symphony Private Pod Name",
 
 You can change log level via config.json, changing to INFO, WARN or DEBUG
 
