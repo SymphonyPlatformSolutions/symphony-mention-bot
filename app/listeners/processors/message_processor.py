@@ -1,6 +1,7 @@
 from sym_api_client_python.clients.user_client import UserClient
 from app.commands.command import AtRoom, Help, Whois
 import defusedxml.ElementTree as ET
+import traceback
 import logging
 import codecs
 import json
@@ -133,6 +134,7 @@ class MessageProcessor:
                             return await AtRoom.atRoom(self, msg)
                     except:
                         logging.error("/all is not working")
+                        traceback.print_exc()
                         self.botaudit = dict(message="""<messageML>ERROR - Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                         self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         return logging.debug("/all is not working", exc_info=True)
@@ -146,6 +148,7 @@ class MessageProcessor:
                             return await Whois.whois(self, msg_mentions, msg)
                     except:
                         logging.error("/whois is not working")
+                        traceback.print_exc()
                         self.botaudit = dict(message="""<messageML>ERROR: Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                         self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         return logging.debug("/whois is not working", exc_info=True)
@@ -159,6 +162,7 @@ class MessageProcessor:
                             return await Help.help(self, msg)
                     except:
                         logging.error("/help is not working")
+                        traceback.print_exc()
                         self.botaudit = dict(message="""<messageML>ERROR: Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                         self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         return logging.debug("Help is not working",  exc_info=True)
@@ -168,4 +172,5 @@ class MessageProcessor:
             else:
                 return logging.debug("User is not from the allowed Pod(s)")
         except:
+            traceback.print_exc()
             return logging.debug("bot @mentioned was not used",  exc_info=True)
