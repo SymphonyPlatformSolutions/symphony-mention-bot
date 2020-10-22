@@ -46,5 +46,9 @@ You can change log level via config.json, changing to INFO, WARN or DEBUG
 
     "LOG_LEVEL" : "INFO"
     
+You can enable bot audit by entering a streamid to receive notification:
+
+    "bot_audit": ""
+
 Start the bot using main_async.py and use "@MentionBot /help" to display the commands
 

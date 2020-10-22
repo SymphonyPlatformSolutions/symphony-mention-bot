@@ -14,11 +14,8 @@ with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
         _config = json.load(json_file)
 
 ## Use config file
-# audit_stream = _config['bot_audit']
-# corp
-# audit_stream = "gNfwD-EUiOzVBEbWHv5g6X___ossLnMcdA"
-# develop2
-audit_stream = "MnWLDq-Ge1sXVL0mhshsk3___ossK-3HdA"
+audit_stream = _config['bot_audit']
+
 
 '''
 Performance improvement:
@@ -129,8 +126,9 @@ class MessageProcessor:
                     try:
                         if "/all" in str(commandName):
                             logging.info("Calling /all by " + str(displayName))
-                            self.botaudit = dict(message="""<messageML>Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                            if audit_stream != "":
+                                self.botaudit = dict(message="""<messageML>Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             return await AtRoom.atRoom(self, msg)
                     except:
                         logging.error("/all is not working")
@@ -142,29 +140,33 @@ class MessageProcessor:
                     try:
                         if "/whois" in str(commandName):
                             logging.info("Calling /whois by " + str(displayName))
-                            self.botaudit = dict(message="""<messageML>Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                            if audit_stream != "":
+                                self.botaudit = dict(message="""<messageML>Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             msg_mentions = self.sym_message_parser.get_mention_ids(msg)
                             return await Whois.whois(self, msg_mentions, msg)
                     except:
                         logging.error("/whois is not working")
                         traceback.print_exc()
-                        self.botaudit = dict(message="""<messageML>ERROR: Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                        self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        if audit_stream != "":
+                            self.botaudit = dict(message="""<messageML>ERROR: Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         return logging.debug("/whois is not working", exc_info=True)
 
                     try:
                     ## Help command when called via :@mention /help call
                         if "/help" in str(commandName):
                             logging.info("Calling /help by " + str(displayName))
-                            self.botaudit = dict(message="""<messageML>Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                            if audit_stream != "":
+                                self.botaudit = dict(message="""<messageML>Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             return await Help.help(self, msg)
                     except:
                         logging.error("/help is not working")
                         traceback.print_exc()
-                        self.botaudit = dict(message="""<messageML>ERROR: Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                        self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        if audit_stream != "":
+                            self.botaudit = dict(message="""<messageML>ERROR: Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         return logging.debug("Help is not working",  exc_info=True)
 
                 else:

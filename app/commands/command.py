@@ -9,7 +9,6 @@ _configPath = os.path.abspath('./resources/config.json')
 with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
         _config = json.load(json_file)
 
-
 ## Use config file
 audit_stream = _config['bot_audit']
 
@@ -225,8 +224,9 @@ class Whois():
                             usernotinside = "This user," + externalUser + " is not inside your Pod"
                             self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + usernotinside + """</messageML>"""))
                             #Audit
-                            self.botaudit = dict(message="""<messageML>/whois This user,""" + externalUser + """ is not inside your Pod)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                            if audit_stream != "":
+                                self.botaudit = dict(message="""<messageML>/whois This user,""" + externalUser + """ is not inside your Pod)</messageML>""")
+                                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                         else:
                             external_flag = True
                             continue
@@ -330,23 +330,25 @@ class Whois():
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
                 #Audit
-                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
-                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                if audit_stream != "":
+                    self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                    self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
 
             elif external_flag:
                 logging.debug("External user: " + str(externalUser[:-2]))
                 externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
                 # Audit
-                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
-                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                if audit_stream != "":
+                    self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                    self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
 
                 return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
 
             logging.info("User lookup rendering")
             #Audit
-            self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - Internal User """ + str(userlist) + """</messageML>""")
-            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+            if audit_stream != "":
+                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - Internal User """ + str(userlist) + """</messageML>""")
+                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
 
             whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
-
