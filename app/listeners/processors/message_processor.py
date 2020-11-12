@@ -1,5 +1,6 @@
 from sym_api_client_python.clients.user_client import UserClient
-from app.commands.command import AtRoom, Help, Whois
+from sym_api_client_python.clients.stream_client import StreamClient
+from app.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
 import traceback
 import logging
@@ -133,8 +134,10 @@ class MessageProcessor:
                     except:
                         logging.error("/all is not working")
                         traceback.print_exc()
-                        self.botaudit = dict(message="""<messageML>ERROR - Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                        self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        if audit_stream != "":
+                            self.botaudit = dict(message="""<messageML>ERROR - Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /all did not run, is the room Read Only?")
                         return logging.debug("/all is not working", exc_info=True)
 
                     try:
@@ -151,6 +154,7 @@ class MessageProcessor:
                         if audit_stream != "":
                             self.botaudit = dict(message="""<messageML>ERROR: Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                             self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /whois did not run, is the room Read Only?")
                         return logging.debug("/whois is not working", exc_info=True)
 
                     try:
@@ -167,6 +171,7 @@ class MessageProcessor:
                         if audit_stream != "":
                             self.botaudit = dict(message="""<messageML>ERROR: Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                             self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /help did not run, is the room Read Only?")
                         return logging.debug("Help is not working",  exc_info=True)
 
                 else:

@@ -352,3 +352,17 @@ class Whois():
 
             whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
             return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
+
+
+class SendIMmsg():
+
+    def __init__(self, bot_client):
+        self.bot_client = bot_client
+
+    async def sendIMmsg(self, StreamClient, userID, firstname, msg):
+
+        ## Gets stream IM of caller and bot
+        streamIM = (StreamClient.create_im(self, [str(userID)])['id'])
+        ## Sends message to the calling user via IM
+        self.imMesage = dict(message="""<messageML>Hi """ + firstname + """, """ + msg + """</messageML>""")
+        self.bot_client.get_message_client().send_msg(streamIM, self.imMesage)
