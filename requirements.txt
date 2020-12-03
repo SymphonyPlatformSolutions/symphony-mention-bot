@@ -1,4 +1,4 @@
-sym-api-client-python>=1.1.4
+sym-api-client-python>=1.3.0
 rsa>=4.6
 urllib3>=1.25.9
 requests-pkcs12==1.4

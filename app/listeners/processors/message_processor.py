@@ -86,6 +86,7 @@ class MessageProcessor:
 
             message_reader = str(var_raw).replace("[", "").replace("'", "").replace("]", "")
             logging.debug("message_reader: " + str(message_reader))
+            print("message_reader: " + str(message_reader))
 
         except:
             return await Help.help(self, msg)
@@ -97,12 +98,12 @@ class MessageProcessor:
             logging.debug("mentions, hashtags, cashtags: " + str(mention))
 
             ## Used for checking the first call is the bot
-            # mention_split = str(mention).split(",")
-            # mention_len = len(str(mention_split[0]))
-            # firstMention = mention_split[0]
-            # logging.debug("firstMention: " + str(firstMention))
+            mention_split = str(mention).split(",")
+            mention_len = len(str(mention_split[0]))
+            firstMention = mention_split[0]
+            logging.debug("firstMention: " + str(firstMention))
         except:
-            # firstMention = mention
+            firstMention = mention
             logging.debug("No @mention",  exc_info=True)
 
         """
@@ -121,7 +122,6 @@ class MessageProcessor:
             if podAllowed:
 
                 ## Making sure the bot @mention is used and matches to respond back
-
                 if str(_config['bot@Mention']) in str(mention):
 
                 ## Making sure the bot was called first
