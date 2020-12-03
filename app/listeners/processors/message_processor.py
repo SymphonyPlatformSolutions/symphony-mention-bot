@@ -95,12 +95,14 @@ class MessageProcessor:
             mention_raw = self.sym_message_parser.get_mentions(msg)
             mention = str(mention_raw).replace("['", "").replace("', '", ", ").replace("']", "")
             logging.debug("mentions, hashtags, cashtags: " + str(mention))
-            mention_split = str(mention).split(",")
-            mention_len = len(str(mention_split[0]))
-            firstMention = mention_split[0]
-            logging.debug("firstMention: " + str(firstMention))
+
+            ## Used for checking the first call is the bot
+            # mention_split = str(mention).split(",")
+            # mention_len = len(str(mention_split[0]))
+            # firstMention = mention_split[0]
+            # logging.debug("firstMention: " + str(firstMention))
         except:
-            firstMention = mention
+            # firstMention = mention
             logging.debug("No @mention",  exc_info=True)
 
         """
@@ -119,7 +121,11 @@ class MessageProcessor:
             if podAllowed:
 
                 ## Making sure the bot @mention is used and matches to respond back
-                if str(firstMention) == str(_config['bot@Mention']):
+
+                if str(_config['bot@Mention']) in str(mention):
+
+                ## Making sure the bot was called first
+                # if str(firstMention) == str(_config['bot@Mention']):
                     logging.debug("mention: " + str(mention))
                     commandName = str(message_reader)[int(mention_len)+1:]
                     logging.debug("commandName: " + str(commandName))
