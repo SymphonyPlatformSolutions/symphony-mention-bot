@@ -71,8 +71,10 @@ class MessageProcessor:
         ## Normal message in the chat - no @mention of #hashtag nor $cashtag
         msg_xml = msg['message']
         msg_root = ET.fromstring(msg_xml)
-        msg_text = msg_root[0].text
-        logging.debug(msg_text)
+        try:
+            msg_text = msg_root[0].text
+        except:
+            msg_text = ""
 
         try:
             ## Get the command send and check its lenght
@@ -85,8 +87,6 @@ class MessageProcessor:
                 var_raw += str(message_raw[l]) + " "
 
             message_reader = str(var_raw).replace("[", "").replace("'", "").replace("]", "")
-            logging.debug("message_reader: " + str(message_reader))
-            print("message_reader: " + str(message_reader))
 
         except:
             return await Help.help(self, msg)
