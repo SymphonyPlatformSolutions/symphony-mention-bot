@@ -1,7 +1,7 @@
 import argparse
 import asyncio
 import logging
-import os, sys, codecs, json
+import app.loader as loader
 
 from sym_api_client_python.auth.auth import Auth
 from sym_api_client_python.auth.rsa_auth import SymBotRSAAuth
@@ -9,53 +9,6 @@ from sym_api_client_python.clients.sym_bot_client import SymBotClient
 from sym_api_client_python.configure.configure import SymConfig
 from app.listeners.im_listener_test_imp import AsyncIMListenerImp
 from app.listeners.room_listener_test_imp import AsyncRoomListenerImp
-
-## Loading config json files
-_configPath = os.path.abspath('./resources/config.json')
-with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
-        _config = json.load(json_file)
-
-
-def configure_logging():
-
-        level_str = _config['LOG_LEVEL']
-        my_level = str(level_str)
-
-        logging.basicConfig(
-                stream=sys.stdout,
-                format='%(asctime)s - %(levelname)s - %(message)s',
-                filemode='w', level=my_level
-        )
-        logger = logging.getLogger()
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-
-        stderr_handler = logging.StreamHandler(sys.stderr)
-        stderr_handler.setLevel(logging.ERROR)
-        stderr_handler.setFormatter(formatter)
-
-        logger.addHandler(stderr_handler)
-        logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-### logs to file
-# def configure_logging():
-#         log_dir = os.path.join(os.path.dirname(__file__), "logs")
-#         if not os.path.exists(log_dir):
-#             os.makedirs(log_dir, exist_ok=True)
-#         logging.basicConfig(
-#                 filename=os.path.join(log_dir, 'MentionBot.log'),
-#                 format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#                 filemode='w', level=logging.DEBUG
-#         )
-#         logging.getLogger("urllib3").setLevel(logging.WARNING)
-
-# def configure_logging():
-#
-#         logging.basicConfig(
-#                 format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#                 level=logging.DEBUG
-#         )
-#         logging.getLogger("urllib3").setLevel(logging.WARNING)
-
 
 loopCount = 0
 def main():
@@ -67,10 +20,7 @@ def main():
 
         args = parser.parse_args()
 
-        # Configure log
-        configure_logging()
-
-        configure = SymConfig(_configPath, _configPath)
+        configure = SymConfig(loader.config._configPath)
         configure.load_config()
 
         if args.auth == "rsa":

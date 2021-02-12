@@ -1,16 +1,12 @@
 from sym_api_client_python.clients.sym_bot_client import APIClient
 from sym_api_client_python.clients.user_client import UserClient
-import codecs, json, os
+import app.loader.config as conf
 import asyncio
 import logging
-
-## Loading config json files
-_configPath = os.path.abspath('./resources/config.json')
-with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
-        _config = json.load(json_file)
+import re
 
 ## Use config file
-audit_stream = _config['bot_audit']
+audit_stream = conf._config['bot_audit']
 
 class Help:
 
@@ -22,7 +18,7 @@ class Help:
         await asyncio.sleep(0)
 
         displayHelp = "<card accent='tempo-bg-color--blue' iconSrc=''> \
-                            <header><h2>Bot Commands (v1.1)</h2></header> \
+                            <header><h2>Bot Commands (v1.2)</h2></header> \
                             <body> \
                               <table style='max-width:100%'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\"> \
                                     <td><b>Command</b></td> \
@@ -31,12 +27,12 @@ class Help:
                                 </thead> \
                                 <tbody> \
                                   <tr> \
-                                    <td>" + _config['bot@Mention'] + " /all</td> \
+                                    <td>" + conf._config['bot@Mention'] + " /all</td> \
                                     <td>At Mention all users of the stream</td> \
                                   </tr> \
                                 <tr> \
-                                  <td>" + _config['bot@Mention'] + " /whois</td> \
-                                  <td>followed by @mention will give the user(s) details</td> \
+                                  <td>" + conf._config['bot@Mention'] + " /whois</td> \
+                                  <td>followed by @mention or email address will give the user(s) details</td> \
                                 </tr> \
                                 </tbody> \
                                 </table> \
@@ -134,31 +130,31 @@ class GetAvatar(APIClient):
             urlcall = "/pod/v3/users?uid=" + str(userid).strip()
 
             response = self.bot_client.execute_rest_call('GET', urlcall)
-            logging.debug(str(response))
+
             pic = str((response['users'][0]['avatars'][1]['url']))#.replace("/150/","/50/")
             logging.debug(str(pic))
 
             ## changing default 50 to 150
             if str(pic).startswith("../avatars/static/50/default.png"):
                 logging.debug("default avatar 50")
-                avatar = _config['podURL'] + "/avatars/static/150/default.png"
+                avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
                 return avatar
 
             ## Handling when avatar is not uploaded to the right bucket
             if str(pic).startswith("http"):
                 logging.debug("None standard URL for Avatar - using s3 bucket, user needs to re-upload avatar")
-                avatar = _config['podURL'] + "/avatars/static/150/default.png"
+                avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
                 return avatar
 
             ## When avatar is correct
             else:
-                avatar = str(_config['podURL']) + str(pic).replace("'}", "")
+                avatar = str(conf._config['podURL']) + str(pic).replace("'}", "")
                 logging.debug(str(avatar))
                 return avatar
 
         except:
             logging.warning("inside except for avatar")
-            avatar = _config['podURL'] + "/avatars/static/150/default.png"
+            avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
             return (avatar)
 
 class Whois():
@@ -166,7 +162,7 @@ class Whois():
     def __init__(self, bot_client):
         self.bot_client = bot_client
 
-    async def whois(self, msg_mentions, msg):
+    async def whois(self, msg_mentions, msg, commandName):
 
         streamid = msg['stream']['streamId']
         externalUser = ""
@@ -176,9 +172,125 @@ class Whois():
         userlist = ""
         caller = msg['user']['displayName']
 
+        if str(commandName).strip() == "/whois":
+            return self.bot_client.get_message_client().send_msg(streamid, dict(message="<messageML>Please @mention a user or enter an email address followed by the /whois command</messageML>"))
+
         if len(msg_mentions) <=1:
-            logging.warning("Please use the command followed by an @mention")
-            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>Please use the command followed by an @mention</messageML>"""))
+
+            ## User search by email address
+            useremail = re.findall(r'[\w\.-]+@[\w\.-]+', commandName)
+
+            if str(useremail) == "[]":
+                self.bot_client.get_message_client().send_msg(streamid, dict(message="<messageML>Please @mention a user or enter an email address followed by the /whois command</messageML>"))
+
+            len_users = len(useremail)
+
+            table_header = ""
+            table_body_main = ""
+
+            table_header_main = "<table style='max-width:100%;table-layout:auto'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--white tempo-bg-color--black\">" \
+                           "<td style='max-width:20%'>ID</td>" \
+                           "<td style='max-width:20%'>FIRST NAME</td>" \
+                           "<td style='max-width:20%'>LAST NAME</td>" \
+                           "<td style='max-width:20%'>DISPLAY NAME</td>" \
+                           "<td style='max-width:20%'>COMPANY</td>" \
+                           "</tr></thead><tbody>"
+
+            for x in range(len_users):
+
+                searchByEmail = UserClient.search_users(self, query=useremail[x], local=False, skip=0, limit=10, filters=None)
+                count = searchByEmail['count']
+
+                if str(count) == "0":
+                    self.bot_client.get_message_client().send_msg(streamid, dict(message="<messageML>There is no Symphony user with this email address " + useremail[x] + "</messageML>"))
+
+                for y in range(count):
+                    userid = searchByEmail['users'][y]['id']
+
+                    try:
+                        firstname = searchByEmail['users'][y]['firstName']
+                    except:
+                        firstname = "N/A"
+                    try:
+                        lastname = searchByEmail['users'][y]['lastName']
+                    except:
+                        lastname = "N/A"
+                    try:
+                        displayname = searchByEmail['users'][y]['displayName']
+                    except:
+                        displayname = "N/A"
+                    try:
+                        company = searchByEmail['users'][y]['company']
+                    except:
+                        company = "N/A"
+                    try:
+                        accountype = searchByEmail['users'][y]['accountType']
+                    except:
+                        accountype = "N/A"
+
+                    userAvatar_raw = await GetAvatar.getAvatar(self, userid)
+                    userAvatar = str(userAvatar_raw).replace("..", "")
+                    avatarLink = "<img src=\"" + str(userAvatar) + "\" />"
+
+                    userlist += " - " + str(displayname)
+
+                    table_body_main += "<tr>" \
+                      "<td>" + str(userid) + "</td>" \
+                      "<td>" + str(firstname) + "</td>" \
+                      "<td>" + str(lastname) + "</td>" \
+                      "<td>" + str(displayname) + "</td>" \
+                      "<td>" + str(company) + "</td>" \
+                      "</tr>"
+
+                    ## Card inside Card
+                    table_header += "<table style='border-collapse:collapse;border:2px solid black;table-layout:auto;width:100%;box-shadow: 5px 5px'><thead><tr style='background-color:#4D94FF;color:#ffffff;font-size:1rem' class=\"tempo-text-color--black tempo-bg-color--black\">" \
+                    "<td style='border:1px solid black;text-align:left' colspan=\"3\"></td></tr><tr>" \
+                    "<td style='border:1px solid black;text-align:center;width:7.5%' rowspan=\"10\">" + str(avatarLink) + "</td>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>ID</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(userid) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>FIRSTNAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(firstname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>LASTNAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(lastname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:7.5%;text-align:center'>DISPLAY NAME</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(displayname) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>COMPANY</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(company) + "</td></tr><tr>" \
+                    "<td style='border:1px solid blue;border-bottom: double blue;width:5%;text-align:center'>TYPE</td>" \
+                    "<td style='border:1px solid black;text-align:center'>" + str(accountype) + " " + "</td></tr></thead><tbody></tbody></table>"
+
+            table_body_main += "</tbody></table>"
+
+            reply_main = table_header_main + table_body_main
+            reply = table_header
+
+            if external_flag and validUser:
+                logging.debug("External user: " + str(externalUser[:-2]))
+                externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
+                self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
+                #Audit
+                if audit_stream != "":
+                    self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                    self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
+            elif external_flag:
+                logging.debug("External user: " + str(externalUser[:-2]))
+                externalUserMessage = "I am sorry, I am not allowed to look up external users: " + str(externalUser[:-2]) + ""
+                # Audit
+                if audit_stream != "":
+                    self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - External User: """ + str(externalUser[:-2]) + """</messageML>""")
+                    self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
+                return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + externalUserMessage + """</messageML>"""))
+
+            logging.info("User lookup rendering")
+            #Audit
+            if audit_stream != "":
+                self.botaudit = dict(message="""<messageML>/whois called by """ + str(caller) + """ - Internal User """ + str(userlist) + """</messageML>""")
+                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
+            whois_card = "<br/><h2>User Details</h2><card iconSrc =\"\" accent=\"tempo-bg-color--blue\"><header>" + str(reply_main) + "</header><body>" + reply + "</body></card>"
+            return self.bot_client.get_message_client().send_msg(streamid, dict(message="""<messageML>""" + whois_card + """</messageML>"""))
 
         else:
 
@@ -320,10 +432,7 @@ class Whois():
             table_body_main += "</tbody></table>"
 
             reply_main = table_header_main + table_body_main
-            logging.debug(str(reply_main))
             reply = table_header
-            logging.debug(str(reply))
-
 
             if external_flag and validUser:
                 logging.debug("External user: " + str(externalUser[:-2]))

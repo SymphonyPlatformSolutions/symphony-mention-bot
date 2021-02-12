@@ -2,21 +2,13 @@ from sym_api_client_python.clients.user_client import UserClient
 from sym_api_client_python.clients.stream_client import StreamClient
 from app.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
+import app.loader.config as conf
 import traceback
 import logging
-import codecs
-import json
-import os
 
-
-## json config file def
-_configPath = os.path.abspath('./resources/config.json')
-with codecs.open(_configPath, 'r', 'utf-8-sig') as json_file:
-        _config = json.load(json_file)
 
 ## Use config file
-audit_stream = _config['bot_audit']
-
+audit_stream = conf._config['bot_audit']
 
 '''
 Performance improvement:
@@ -109,7 +101,7 @@ class MessageProcessor:
         """
         This is to make sure the user is from the allowed pod(s)
         """
-        if userCompany in _config['allowedPod']:
+        if userCompany in conf._config['allowedPod']:
             logging.debug("Inside allowed Pod(s), True")
             podAllowed = True
         else:
@@ -122,7 +114,7 @@ class MessageProcessor:
             if podAllowed:
 
                 ## Making sure the bot @mention is used and matches to respond back
-                if str(_config['bot@Mention']) in str(mention):
+                if str(conf._config['bot@Mention']) in str(mention):
 
                 ## Making sure the bot was called first
                 # if str(firstMention) == str(_config['bot@Mention']):
@@ -153,7 +145,7 @@ class MessageProcessor:
                                 self.botaudit = dict(message="""<messageML>Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                                 self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             msg_mentions = self.sym_message_parser.get_mention_ids(msg)
-                            return await Whois.whois(self, msg_mentions, msg)
+                            return await Whois.whois(self, msg_mentions, msg, commandName)
                     except:
                         logging.error("/whois is not working")
                         traceback.print_exc()
