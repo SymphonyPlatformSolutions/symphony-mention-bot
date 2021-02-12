@@ -4,7 +4,7 @@ from app.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
 import app.loader.config as conf
 import traceback
-import logging
+import logging, html
 
 
 ## Use config file
@@ -129,14 +129,10 @@ class MessageProcessor:
                                 self.botaudit = dict(message="""<messageML>Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                                 self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             return await AtRoom.atRoom(self, msg)
-                    except:
-                        logging.error("/all is not working")
-                        traceback.print_exc()
-                        if audit_stream != "":
-                            self.botaudit = dict(message="""<messageML>ERROR - Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
-                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /all did not run, is the room Read Only?")
-                        return logging.debug("/all is not working", exc_info=True)
+                    except Exception as ex:
+                        logging.error("/all did not run")
+                        logging.exception("Message Command Processor Exception: {}".format(ex))
+                        await auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname)
 
                     try:
                         if "/whois" in str(commandName):
@@ -146,14 +142,10 @@ class MessageProcessor:
                                 self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             msg_mentions = self.sym_message_parser.get_mention_ids(msg)
                             return await Whois.whois(self, msg_mentions, msg, commandName)
-                    except:
-                        logging.error("/whois is not working")
-                        traceback.print_exc()
-                        if audit_stream != "":
-                            self.botaudit = dict(message="""<messageML>ERROR: Function /whois called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
-                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /whois did not run, is the room Read Only?")
-                        return logging.debug("/whois is not working", exc_info=True)
+                    except Exception as ex:
+                        logging.error("/whois did not run")
+                        logging.exception("Message Command Processor Exception: {}".format(ex))
+                        await auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname)
 
                     try:
                     ## Help command when called via :@mention /help call
@@ -163,14 +155,10 @@ class MessageProcessor:
                                 self.botaudit = dict(message="""<messageML>Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
                                 self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
                             return await Help.help(self, msg)
-                    except:
-                        logging.error("/help is not working")
-                        traceback.print_exc()
-                        if audit_stream != "":
-                            self.botaudit = dict(message="""<messageML>ERROR: Function /help called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
-                            self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
-                        await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," the command /help did not run, is the room Read Only?")
-                        return logging.debug("Help is not working",  exc_info=True)
+                    except Exception as ex:
+                        logging.error("/help did not run")
+                        logging.exception("Message Command Processor Exception: {}".format(ex))
+                        await auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname)
 
                 else:
                     return logging.debug("bot @mentioned does not match expected, or not calling bot command")
@@ -179,3 +167,13 @@ class MessageProcessor:
         except:
             traceback.print_exc()
             return logging.debug("bot @mentioned was not used",  exc_info=True)
+
+## allow to get inside Symphony any exception messages
+async def auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname):
+    try:
+        if audit_stream != "":
+            exception_format = html.escape('Message Command Processor Exception: {}'.format(ex))
+            self.bot_client.get_message_client().send_msg(audit_stream, dict(message='<messageML>' + exception_format + '<br/><br/>Mesage sent by ' + str(displayName) + 'in ' + str(streamID) + ' (' + str(streamType) + '): <code>' + str(self.sym_message_parser.get_text(msg)) + '</code>Error:<code>' + html.escape(traceback.format_exc()) + '</code></messageML>'))
+            return await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," your last command did not run, please reach out to the Bot Admin")
+    except:
+        logging.debug("auditLogging function did not run")
