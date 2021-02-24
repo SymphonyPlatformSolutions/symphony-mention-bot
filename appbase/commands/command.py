@@ -1,6 +1,6 @@
 from sym_api_client_python.clients.sym_bot_client import APIClient
 from sym_api_client_python.clients.user_client import UserClient
-import app.loader.config as conf
+import appbase.botloader.config as conf
 import asyncio
 import logging
 import re

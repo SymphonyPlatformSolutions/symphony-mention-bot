@@ -1,12 +1,12 @@
 {
     "podURL": "https://<podname>.symphony.com",
-    "sessionAuthHost": "podname.symphony.com",
+    "sessionAuthHost": "<podname>.symphony.com",
     "sessionAuthPort": 443,
-    "keyAuthHost": "podname.symphony.com",
+    "keyAuthHost": "<podname>.symphony.com",
     "keyAuthPort": 443,
-    "podHost": "podname.symphony.com",
+    "podHost": "<podname>.symphony.com",
     "podPort": 443,
-    "agentHost": "podname.symphony.com",
+    "agentHost": "<podname>.symphony.com",
     "agentPort": 443,
     "authType": "rsa",
     "botCertPath": "",
@@ -22,7 +22,9 @@
     "proxyPassword": "",
     "authTokenRefreshPeriod": "30",
     "truststorePath": "",
-    "allowedPod" : "<podname>",
+    "allowedPod" : "<companyname>",
     "LOG_LEVEL" : "INFO",
-    "bot_audit": "<streamid>"
+    "bot_audit": "<streamid>",
+    "reuseDatafeedID": true,
+    "datafeedIdFilePath": "app"
 }

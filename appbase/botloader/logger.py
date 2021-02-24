@@ -1,4 +1,4 @@
-import app.loader.config as conf
+import appbase.botloader.config as conf
 import logging.config
 import sys, os
 from datetime import datetime

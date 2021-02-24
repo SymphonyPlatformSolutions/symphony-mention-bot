@@ -1,14 +1,14 @@
 import argparse
 import asyncio
 import logging
-import app.loader as loader
+import appbase.botloader as botloader
 
 from sym_api_client_python.auth.auth import Auth
 from sym_api_client_python.auth.rsa_auth import SymBotRSAAuth
 from sym_api_client_python.clients.sym_bot_client import SymBotClient
 from sym_api_client_python.configure.configure import SymConfig
-from app.listeners.im_listener_test_imp import AsyncIMListenerImp
-from app.listeners.room_listener_test_imp import AsyncRoomListenerImp
+from appbase.listeners.im_listener_test_imp import AsyncIMListenerImp
+from appbase.listeners.room_listener_test_imp import AsyncRoomListenerImp
 
 loopCount = 0
 def main():
@@ -20,7 +20,7 @@ def main():
 
         args = parser.parse_args()
 
-        configure = SymConfig(loader.config._configPath)
+        configure = SymConfig(botloader.config._configPath)
         configure.load_config()
 
         if args.auth == "rsa":

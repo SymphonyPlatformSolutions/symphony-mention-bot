@@ -1,8 +1,8 @@
 from sym_api_client_python.clients.user_client import UserClient
 from sym_api_client_python.clients.stream_client import StreamClient
-from app.commands.command import AtRoom, Help, Whois, SendIMmsg
+from appbase.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
-import app.loader.config as conf
+import appbase.botloader.config as conf
 import traceback
 import logging, html
 
