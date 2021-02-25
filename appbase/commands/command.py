@@ -1,12 +1,12 @@
 from sym_api_client_python.clients.sym_bot_client import APIClient
 from sym_api_client_python.clients.user_client import UserClient
-import appbase.botloader.config as conf
+from appbase.botloader.config import _config
 import asyncio
 import logging
 import re
 
 ## Use config file
-audit_stream = conf._config['bot_audit']
+audit_stream = _config['bot_audit']
 
 class Help:
 
@@ -27,11 +27,11 @@ class Help:
                                 </thead> \
                                 <tbody> \
                                   <tr> \
-                                    <td>" + conf._config['bot@Mention'] + " /all</td> \
+                                    <td>" + _config['bot@Mention'] + " /all</td> \
                                     <td>At Mention all users of the stream</td> \
                                   </tr> \
                                 <tr> \
-                                  <td>" + conf._config['bot@Mention'] + " /whois</td> \
+                                  <td>" + _config['bot@Mention'] + " /whois</td> \
                                   <td>followed by @mention or email address will give the user(s) details</td> \
                                 </tr> \
                                 </tbody> \
@@ -137,24 +137,24 @@ class GetAvatar(APIClient):
             ## changing default 50 to 150
             if str(pic).startswith("../avatars/static/50/default.png"):
                 logging.debug("default avatar 50")
-                avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
+                avatar = _config['podURL'] + "/avatars/static/150/default.png"
                 return avatar
 
             ## Handling when avatar is not uploaded to the right bucket
             if str(pic).startswith("http"):
                 logging.debug("None standard URL for Avatar - using s3 bucket, user needs to re-upload avatar")
-                avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
+                avatar = _config['podURL'] + "/avatars/static/150/default.png"
                 return avatar
 
             ## When avatar is correct
             else:
-                avatar = str(conf._config['podURL']) + str(pic).replace("'}", "")
+                avatar = str(_config['podURL']) + str(pic).replace("'}", "")
                 logging.debug(str(avatar))
                 return avatar
 
         except:
             logging.warning("inside except for avatar")
-            avatar = conf._config['podURL'] + "/avatars/static/150/default.png"
+            avatar = _config['podURL'] + "/avatars/static/150/default.png"
             return (avatar)
 
 class Whois():

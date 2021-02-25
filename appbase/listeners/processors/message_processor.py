@@ -2,13 +2,13 @@ from sym_api_client_python.clients.user_client import UserClient
 from sym_api_client_python.clients.stream_client import StreamClient
 from appbase.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
-import appbase.botloader.config as conf
+from appbase.botloader.config import _config
 import traceback
 import logging, html
 
 
 ## Use config file
-audit_stream = conf._config['bot_audit']
+audit_stream = _config['bot_audit']
 
 '''
 Performance improvement:
@@ -101,7 +101,7 @@ class MessageProcessor:
         """
         This is to make sure the user is from the allowed pod(s)
         """
-        if userCompany in conf._config['allowedPod']:
+        if userCompany in _config['allowedPod']:
             logging.debug("Inside allowed Pod(s), True")
             podAllowed = True
         else:
@@ -114,7 +114,7 @@ class MessageProcessor:
             if podAllowed:
 
                 ## Making sure the bot @mention is used and matches to respond back
-                if str(conf._config['bot@Mention']) in str(mention):
+                if str(_config['bot@Mention']) in str(mention):
 
                 ## Making sure the bot was called first
                 # if str(firstMention) == str(_config['bot@Mention']):

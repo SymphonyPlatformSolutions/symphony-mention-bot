@@ -1,9 +1,9 @@
-import appbase.botloader.config as conf
+from appbase.botloader.config import _config
 import logging.config
 import sys, os
 from datetime import datetime
 
-level_str = conf._config['LOG_LEVEL']
+level_str = _config['LOG_LEVEL']
 my_level = str(level_str)
 
 ### To log to STDERR
