@@ -123,7 +123,7 @@ class MessageProcessor:
                     logging.debug("commandName: " + str(commandName))
 
                     try:
-                        if "/all" in str(commandName):
+                        if "/all" in str(commandName) or "/All" in str(commandName):
                             logging.info("Calling /all by " + str(displayName))
                             if audit_stream != "":
                                 self.botaudit = dict(message="""<messageML>Function /all called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
