@@ -1,7 +1,7 @@
 # Mention
 Symphony Room @mention bot by Alex Nalin (Symphony Solutions Architect)
 
-This bot was build using the Symphony Python SDK. (QAed: 1.3.1)
+This bot was build using the Symphony Python SDK. (QAed: 1.3.4)
 
 https://developers.symphony.com/symphony-developer/docs/get-started-with-python.
 
