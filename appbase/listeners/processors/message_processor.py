@@ -4,7 +4,7 @@ from appbase.commands.command import AtRoom, Help, Whois, SendIMmsg
 import defusedxml.ElementTree as ET
 from appbase.botloader.config import _config
 import traceback
-import logging, html
+import logging, html, os, psutil, time, datetime
 
 
 ## Use config file
@@ -148,6 +148,29 @@ class MessageProcessor:
                         await auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname)
 
                     try:
+                        if "/status" in str(commandName):
+                            logging.info("Calling /help by " + str(displayName))
+                            if audit_stream != "":
+                                self.botaudit = dict(message="""<messageML>Function /status called by <b>""" + str(displayName) + """</b> in """ + str(streamID) + """ (""" + str(streamType) + """)</messageML>""")
+                                self.bot_client.get_message_client().send_msg(audit_stream, self.botaudit)
+
+                            date2 = datetime.datetime.now()
+                            p = psutil.Process(os.getpid())
+                            date1 = datetime.datetime.strptime(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(p.create_time())),"%Y-%m-%d %H:%M:%S")
+
+                            uptime = ("\n%d days, %d hours, %d minutes, %d seconds" % dhms_from_seconds(date_diff_in_seconds(date2, date1)))
+                            self.uptimemessage = dict(message="<messageML>I have been running for " + str(uptime) + "</messageML>")
+                            return self.bot_client.get_message_client().send_msg(streamID, self.uptimemessage)
+                            ##
+
+                            #return await Help.help(self, msg)
+                    except Exception as ex:
+                        logging.error("/status did not run")
+                        logging.exception("Message Command Processor Exception: {}".format(ex))
+                        await auditLogging(self, ex, displayName, streamID, streamType, msg, userID, firstname)
+
+
+                    try:
                     ## Help command when called via :@mention /help call
                         if "/help" in str(commandName):
                             logging.info("Calling /help by " + str(displayName))
@@ -177,3 +200,14 @@ async def auditLogging(self, ex, displayName, streamID, streamType, msg, userID,
             return await SendIMmsg.sendIMmsg(self, StreamClient, userID, firstname," your last command did not run, please reach out to the Bot Admin")
     except:
         logging.debug("auditLogging function did not run")
+
+## Used for Bot status call to see untime
+def date_diff_in_seconds(dt2, dt1):
+  timedelta = dt2 - dt1
+  return timedelta.days * 24 * 3600 + timedelta.seconds
+#
+def dhms_from_seconds(seconds):
+    minutes, seconds = divmod(seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    return (days, hours, minutes, seconds)

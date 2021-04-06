@@ -20,6 +20,8 @@ Add bot to room and use @mention /all to @mention all members of the stream (Roo
     
     @Mention Bot /whois
 
+    @Mention Bot /status
+
 
 ##
 

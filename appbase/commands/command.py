@@ -34,6 +34,10 @@ class Help:
                                   <td>" + _config['bot@Mention'] + " /whois</td> \
                                   <td>followed by @mention or email address will give the user(s) details</td> \
                                 </tr> \
+                                <tr> \
+                                  <td>" + _config['bot@Mention'] + " /status</td> \
+                                  <td>Shows how long the bot has been running for</td> \
+                                </tr> \
                                 </tbody> \
                                 </table> \
                             </body> \
